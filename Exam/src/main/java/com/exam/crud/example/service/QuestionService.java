@@ -7,13 +7,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.exam.crud.example.entity.Question2;
+import com.exam.crud.example.entity.Quiz2;
 import com.exam.crud.example.respository.QuestionsRepository;
+import com.exam.crud.example.respository.QuizRepository2;
 
 @Service
 public class QuestionService {
 
 	@Autowired
 	private QuestionsRepository repository;
+	
+	@Autowired
+	private QuizRepository2 quizRepo;
 
 	public Question2 addQuestion(Question2 question) {
 		return repository.save(question);
@@ -51,8 +56,20 @@ public class QuestionService {
 	public Question2 saveAnswer(Map<String, String> options) {
 		Integer idq=Integer.parseInt(options.get("cqid"));
 		Question2 question=repository.getById(idq);
-		question.setSelectedOption(options.get("os"));
+		if(options.get("os")=="") {
+			question.setSelectedOption("");	
+		}else if(!options.get("os").isEmpty()) {
+			question.setSelectedOption(options.get("os"));
+			updateStatus(options.get("quizId"));			
+		}
 		return repository.save(question);
+	}
+
+	private void updateStatus(String id) {
+		Quiz2 quizDetails= quizRepo.getById(Integer.parseInt(id));
+		int count=quizDetails.getAnswered();
+		quizDetails.setAnswered(count+=1);
+
 	}
 
 }

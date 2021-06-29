@@ -68,7 +68,6 @@ public class QuestionController {
 
 	@PostMapping("/question/answer")
 	public Question2 saveAnswer(@RequestBody Map<String, String> options) {
-		System.out.println("cont"+options.get("cqid")+" "+options.get("os"));
 		return service.saveAnswer(options);
 	}
 }
