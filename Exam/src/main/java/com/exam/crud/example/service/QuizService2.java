@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.exam.crud.example.entity.Quiz2;
+import com.exam.crud.example.respository.QuestionsRepository;
 import com.exam.crud.example.respository.QuizRepository2;
 
 @Service
@@ -13,6 +14,9 @@ public class QuizService2 {
 
 	@Autowired
 	private QuizRepository2 repo;
+	
+	@Autowired
+	private QuestionsRepository questionRepo;
 	
 	public Quiz2 addQuiz(Quiz2 quiz) {
 		return repo.save(quiz);
@@ -23,6 +27,7 @@ public class QuizService2 {
 	}
 	
 	public Quiz2 getQuizById(Integer id) {
+		updateStatus(id);
 		return repo.findById(id).orElse(null);
 	}
 	
@@ -40,5 +45,14 @@ public class QuizService2 {
 	public List<Quiz2> deleteQuiz(Integer id) {
 		repo.deleteById(id);
 		return repo.findAll();
+	}
+	
+	public void updateStatus(Integer id) {
+		int count=questionRepo.getCountofAnswered(id);
+		Quiz2 quizDetails= repo.findById(id).orElse(null);
+		quizDetails.setAnswered(count);
+		List<Integer> totalCount = questionRepo.getIdCount(id);
+		quizDetails.setNotAnswered(totalCount.size()-count);
+		repo.saveAndFlush(quizDetails);
 	}
 }

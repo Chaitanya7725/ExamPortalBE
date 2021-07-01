@@ -54,22 +54,21 @@ public class QuestionService {
 	}
 
 	public Question2 saveAnswer(Map<String, String> options) {
-		Integer idq=Integer.parseInt(options.get("cqid"));
-		Question2 question=repository.getById(idq);
-		if(options.get("os")=="") {
-			question.setSelectedOption("");	
-		}else if(!options.get("os").isEmpty()) {
-			question.setSelectedOption(options.get("os"));
-			updateStatus(options.get("quizId"));			
-		}
-		return repository.save(question);
+		Integer cqid=Integer.parseInt(options.get("cqid"));
+		Question2 question=repository.getById(cqid);
+		question.setSelectedOption(options.get("os"));
+		question=repository.saveAndFlush(question);
+		updateStatus(options.get("quizId"));		
+		return question;
 	}
 
 	private void updateStatus(String id) {
+		int count=repository.getCountofAnswered(Integer.parseInt(id));
 		Quiz2 quizDetails= quizRepo.getById(Integer.parseInt(id));
-		int count=quizDetails.getAnswered();
-		quizDetails.setAnswered(count+=1);
-
+		quizDetails.setAnswered(count);
+		List<Integer> totalCount = getQuestionsCount(Integer.parseInt(id));
+		quizDetails.setNotAnswered(totalCount.size()-count);
+		quizRepo.saveAndFlush(quizDetails);
 	}
 
 }
